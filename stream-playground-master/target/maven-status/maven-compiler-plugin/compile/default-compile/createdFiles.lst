@@ -1,0 +1,10 @@
+brickset/PackagingType.class
+countries/CountryRepository.class
+brickset/Dimensions.class
+countries/Region.class
+countries/Country.class
+brickset/LegoSetRepository.class
+repository/JacksonHelper.class
+repository/package-info.class
+repository/Repository.class
+brickset/LegoSet.class
