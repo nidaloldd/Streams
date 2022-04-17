@@ -1,5 +1,6 @@
 package countries;
 
+import brickset.LegoSetRepository;
 import repository.Repository;
 
 /**
@@ -11,4 +12,15 @@ public class CountryRepository extends Repository<Country> {
         super(Country.class, "countries.json");
     }
 
+
+    public static void main(String[] args) {
+
+        var countries = new CountryRepository().getAll();
+
+        countries.stream().map(Country::getName).forEach(System.out::println);
+
+    }
+
+
 }
+

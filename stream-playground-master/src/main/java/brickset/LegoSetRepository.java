@@ -3,7 +3,11 @@ package brickset;
 
 import repository.Repository;
 
-import java.util.Comparator;
+import java.time.Year;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Represents a repository of {@code LegoSet} objects.
@@ -14,51 +18,77 @@ public class LegoSetRepository extends Repository<LegoSet> {
     }
 
     public static void main(String[] args) {
-        //printLegoSetsWithTag();
-        //printOldestLegoSet();
-        //printSmallLegoSets();
-        //printNumberOfLegoCitySet();
-        printLegoSetsWith_K();
-        
+
+        // System.out.println(isAnyLegoWithZeroPieces());
+        //printAllTags();
+        //System.out.println(SumOfLegoPieces());
+        //System.out.println(getNumberOfPackagingTypeForEachSet());
+        System.out.println(getMapOfYearWithTheirLegoSets());
 
     }
-    public static void printLegoSetsWithTag() {
+    /**
+     * @returns whether there is at least one Lego set with 0 pieces
+     * */
+    public static boolean isAnyLegoWithZeroPieces() {
         var brickset = new LegoSetRepository().getAll();
-        brickset.stream().
-                filter(x -> x.getTags() != null).
-                forEach(System.out::println);
+
+        return brickset.stream().anyMatch(LegoSet -> LegoSet.getPieces()==0 );
     }
-    public static void printOldestLegoSet() {
-        final var brickset = new LegoSetRepository().getAll();
-        brickset.stream().
-                min(Comparator.comparing(LegoSet::getYear));
-        System.out.println(brickset);
+    /**
+     * Print all tags one time in ABC order
+     * */
+    public static void printAllTags() {
+        var brickset = new LegoSetRepository().getAll();
+
+        brickset.stream().filter(LegoSet-> LegoSet.getTags()!=null)
+                .flatMap(LegoSet -> LegoSet.getTags().stream())
+                .sorted()
+                .distinct()
+                .forEach(System.out::println);
     }
 
-    public static void printSmallLegoSets() {
-        final var brickset = new LegoSetRepository().getAll();
+    /**
+     *  The Sum of Lego Pieces with reduce
+     *
+     * @return the sum of all Lego Pieces
+     */
+    public static long SumOfLegoPieces() {
+        var brickset = new LegoSetRepository().getAll();
 
-        brickset.stream().
-                filter(p -> p.getPieces()<10).
-                map(LegoSet::getPieces).
-                forEach(System.out::println);
+        return brickset.stream().map(LegoSet::getPieces)
+                .reduce(0, (partialAgeResult, p) -> partialAgeResult + p , Integer::sum);
     }
-    public static void printNumberOfLegoCitySet() {
-        final var brickset = new LegoSetRepository().getAll();
 
-        brickset.stream().
-                filter(p -> p.getTheme()=="City").
-                map(LegoSet::getName);
-        System.out.println(brickset.stream().count());
-    }
-    public static void printLegoSetsWith_K() {
-        final var brickset = new LegoSetRepository().getAll();
+    /**
+     * Returns a Map object, that contains the packaging type and the number of lego set with the same packaging type
+     *
+     * @return {@code Map<String, Long>} object wrapping how many lego sets have the same packaging type
+     */
+    public static Map<PackagingType, Long> getNumberOfPackagingTypeForEachSet() {
+        var brickset = new LegoSetRepository().getAll();
 
-        brickset.stream().
-                filter(x -> x.getName().charAt(0)=='K').
-                forEach(System.out::println);
+        return brickset.stream()
+                .collect(Collectors.groupingBy(LegoSet::getPackagingType, Collectors.counting()));
 
     }
+
+    /**
+     * Returns a Map object, that contains the year and the lego sets of the year
+     *
+     * @return {@code Map<Year, Set<String>>} object wrapping the Years and their lego sets name.
+     */
+    public static Map<Year, Set<String>> getMapOfYearWithTheirLegoSets() {
+
+        var brickset = new LegoSetRepository().getAll();
+
+        return brickset.stream()
+                .collect(Collectors.groupingBy(LegoSet::getYear,
+                        Collectors.mapping(LegoSet::getName,
+                                Collectors.filtering(Objects::nonNull,
+                                        Collectors.toSet()))));
+    }
+
+
 
 }
 
